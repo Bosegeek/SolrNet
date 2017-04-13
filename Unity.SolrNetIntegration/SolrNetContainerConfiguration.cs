@@ -22,6 +22,11 @@ using Unity.SolrNetIntegration.Config;
 
 namespace Unity.SolrNetIntegration {
   public class SolrNetContainerConfiguration {
+      public IUnityContainer ConfigureContainer(IUnityContainer container) {
+          ConfigureContainer(null, container);
+        return container;
+      }
+
     public IUnityContainer ConfigureContainer(SolrServers solrServers, IUnityContainer container) {
       container.RegisterType<IReadOnlyMappingManager, MemoizingMappingManager>(new InjectionConstructor(new ResolvedParameter(typeof (AttributesMappingManager))));
       container.RegisterType(typeof (ISolrDocumentActivator<>), typeof (SolrDocumentActivator<>));
@@ -38,6 +43,10 @@ namespace Unity.SolrNetIntegration {
       return container;
     }
 
+    public void RegisterSolrServer(SolrServerElement element, IUnityContainer container) {
+        RegisterCore(GetCoreFrom(element), container);
+      }
+    
     private void RegisterValidationRules(IUnityContainer container) {
       var validationRules = new[] {
         typeof (MappedPropertiesIsInSolrSchemaRule),
@@ -136,7 +145,7 @@ namespace Unity.SolrNetIntegration {
           new ResolvedParameter(typeof (IMappingValidator))));
     }
 
-    private void AddCoresFromConfig(SolrServers solrServers, IUnityContainer container) {
+        private void AddCoresFromConfig(SolrServers solrServers, IUnityContainer container) {
       if (solrServers == null) {
         return;
       }
